@@ -38,7 +38,7 @@ module.exports = function (app, passport) {
 
 	app.route('/api/:id')
 		.get(isLoggedIn, function (req, res) {
-			res.json(req.user.github);
+			res.json(req.user.twitter);
 		});
 
 	app.route('/auth/github')
@@ -48,6 +48,14 @@ module.exports = function (app, passport) {
 		.get(passport.authenticate('github', {
 			successRedirect: '/',
 			failureRedirect: '/login'
+		}));
+		
+	app.route('/auth/twitter').get(passport.authenticate('twitter'));
+	
+	app.route('/auth/twitter/callback')
+		.get(passport.authenticate('twitter',{
+			successRedirect:'/',
+			failureRedirect:'/login'
 		}));
 
 	app.route('/api/:id/clicks')

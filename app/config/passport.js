@@ -63,11 +63,31 @@ module.exports = function (passport) {
 		callbackURL: configAuth.twitterAuth.callbackURL
 	},
 	function(token, tokenSecret, profile, done){
-		User.findOrCreate({ 'twitter.id': profile.id }, function(err,user){
-			if(err){
-				return done(err);
-			}
-			done(null,user);
+		process.nextTick(function () {
+			User.findOne({ 'twitter.id': profile.id }, function (err, user) {
+				if (err) {
+					return done(err);
+				}
+
+				if (user) {
+					return done(null, user);
+				} else {
+					var newUser = new User();
+
+					newUser.twitter.id = profile.id;
+					newUser.twitter.username = profile.username;
+					newUser.twitter.displayName = profile.displayName;
+					newUser.nbrClicks.clicks = 0;
+
+					newUser.save(function (err) {
+						if (err) {
+							throw err;
+						}
+
+						return done(null, newUser);
+					});
+				}
+			});
 		});
 	}
 	));
